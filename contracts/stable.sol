@@ -16,8 +16,8 @@ contract SteveToken is ERC20Interface {
     constructor() public {
         symbol = "AST";
         name = "AST";
-        decimals = 2;
-        _totalSupply = 10000;
+        decimals = 18;
+        _totalSupply = 10000000000000000000000;
         balances[msg.sender] = _totalSupply;
         emit Transfer(address(0), msg.sender, _totalSupply);
     }
@@ -46,5 +46,26 @@ contract SteveToken is ERC20Interface {
         allowed[msg.sender][spender] = tokens;
         emit Approval(msg.sender, spender, tokens);
         return true;
+    }
+
+    function transferFrom(
+        address From,
+        address to,
+        uint256 tokens
+    ) public returns (bool success) {
+        balances[From] = balances[From];
+        allowed[From][msg.sender] = allowed[From][msg.sender];
+        require(tokens >= allowed[From][msg.sender], "insufiicient allowance");
+        balances[to] = balances[to] + tokens;
+        emit Transfer(From, to, tokens);
+        return true;
+    }
+
+    function allowance(address tokenOwner, address spender)
+        public
+        view
+        returns (uint256 remaining)
+    {
+        return allowed[tokenOwner][spender];
     }
 }
