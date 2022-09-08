@@ -3,13 +3,16 @@ import { ethers } from "ethers"
 import { useState,useEffect } from "react"
 import { abi } from "../../abi"
 import injected from "../../connector"
+import {toast } from 'react-toastify';
 
 
 
 const useLogic = () => {
     const [token, setTokenBal] = useState()
     const [totalSupply, setTotalSupply] = useState(null);
+    const [isCreateTotal, setIsCreateTotalSup] = useState(false)
     const [balOf, setBalOf] = useState(null)
+    const [isFetchingBal,setIsFetchingBal] = useState(false)
     const [allowance, setAlowance] = useState(null)
     const [allowanceRec, setAllowRec] = useState(null)
     const [isAllowanceCreated, setIsAllowanceCreated] = useState(false)
@@ -43,38 +46,64 @@ const useLogic = () => {
 
 //fetch token balance 
     const fetchTokenSupply = async () => {
-        alert("totalsuply")
-        let tokenSup = ethers.utils.formatUnits(await contractInstance._totalSupply(), "ether")
-        setTotalSupply(tokenSup)
+
+        try {
+            setIsCreateTotalSup(true)
+            let tokenSup = ethers.utils.formatUnits(await contractInstance._totalSupply(), "ether")
+            if (tokenSup) {
+                setTotalSupply(tokenSup)
+                setIsCreateTotalSup(false)
+            }
+            
+        }
+        catch (e) {
+            alert(`Error occurred: ${e}`)
+        }
+       
+      
+       
         
 
         
     }
 //get token Balance 
     const fetchTokenBal = async () => {
+        setIsFetchingBal(true)
         let contractInstance = new ethers.Contract(process.env.NEXT_PUBLIC_CONTRACT, abi, library)
         let tokenSup = ethers.utils.formatUnits(await contractInstance.balanceOf(account), "ether");
-        setBalOf(tokenSup)
+        if (tokenSup) {
+            setIsFetchingBal(false)
+            setBalOf(tokenSup)
+        }
+        
         
     }
 
 //create allowance
     const createAllowance = async () => {
-        if (!allowance) return alert("please enter a valid value");
-        if (!active) return alert("please connect to wallet to create allowance")
-        if (!allowance && !allowanceRec) return alert("fill in form to create allowance")
-        setIsAllowanceCreated(true)
-        let contractInstance = new ethers.Contract(process.env.NEXT_PUBLIC_CONTRACT, abi, library.getSigner())
+        try {
+            if (!allowance) return alert("please enter a valid value");
+            if (!active) return alert("please connect to wallet to create allowance")
+            if (!allowance && !allowanceRec) return alert("fill in form to create allowance")
+            setIsAllowanceCreated(true)
+            let contractInstance = new ethers.Contract(process.env.NEXT_PUBLIC_CONTRACT, abi, library.getSigner())
+            
+            let tx = await contractInstance.approve(allowanceRec, parseInt(allowance))
+            let transRec = await tx.wait()
+            if (transRec) {
+                alert("allowance created successfully")
+                setIsAllowanceCreated(false)
+                setAlowance("")
+                setAllowRec("")
+                toast("allowance created sucessfully")
+            }
         
-        let tx = await contractInstance.approve(allowanceRec, parseInt(allowance))
-        let transRec = await tx.wait()
-        if (transRec) {
-            alert("allowance created successfully")
-            setIsAllowanceCreated(false)
-            setAlowance("")
-            setAllowRec("")
+            
         }
-    
+        catch (e) {
+            alert(`Error: ${e}`)
+        }
+       
     }
 
 //send amount approve to spend on behalf 
@@ -95,7 +124,8 @@ const useLogic = () => {
             
     }
     catch (e) {
-        alert(`error occurred: ${e.error}`)
+            alert(`error occurred: ${e.error}`)
+            console.log("tranferFromErr",e)
     }
         
         
@@ -133,7 +163,11 @@ const useLogic = () => {
         setTransAmt,
         transferFrom,
         isTransFrom,
-        setIsTransFrom
+        setIsTransFrom,
+        isCreateTotal,
+        setIsCreateTotalSup,
+        isFetchingBal,
+       
     }
 
     

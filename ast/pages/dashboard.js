@@ -1,4 +1,7 @@
 import useLogic from "./logic/dashboard"
+import { BeatLoader } from "react-spinners"
+import {ToastContainer } from 'react-toastify';
+
 
 const Dashboard = () => {
     const { connectToWallet,
@@ -21,7 +24,10 @@ const Dashboard = () => {
         transAmt,
         setTransAmt,
         transferFrom,
-        isTransFrom
+        isTransFrom,
+        isCreateTotal,
+        setIsCreateTotalSup,
+        isFetchingBal
     } = useLogic()
 
     if (!account) {
@@ -40,18 +46,23 @@ const Dashboard = () => {
 
     
     return <div className="w-screen min-h-screen  bg-[#F9FBFB] flex justify-center flex-col items-center">
+        <ToastContainer></ToastContainer>
         <h3 className="font-bold text-[25px] mb-5 text-[]">Interface showing the core functionality of ERC20 Token </h3>
         <section className="w-[50%] rounded-xl min-h-[400px] bg-[#F9FBFB] shadow-2xl p-5 flex justify-center items-center flex-col">
             <div className="w-1/2  flex justify-between items-center">
                 <button className="font-bold bg-[#009393]
-                    p-4 h-[50px] w-auto rounded-xl text-white flex justify-center items-center" onClick={fetchTokenSupply}>GetTotalSupply</button>
-                {totalSupply ?  <p>totalSupply: {totalSupply}</p>:null }
+                    p-4 h-[50px] w-auto rounded-xl text-white flex justify-center items-center" onClick={fetchTokenSupply}>
+                    {isCreateTotal === true ?  <BeatLoader color="#FFFFFF" /> :"GetTotalSupply"}
+                    
+                </button>
+               
+                {totalSupply ? <p>totalSupply: {totalSupply}</p> : null}
                
             </div>
             <div className="w-1/2  flex justify-between items-center">
                 <button
                     className="font-bold bg-[#009393] p-4 h-[50px] mt-2 w-auto
-                    rounded-xl text-white flex justify-center items-center" onClick={fetchTokenBal}>GetBalanceOf</button>
+                    rounded-xl text-white flex justify-center items-center" onClick={fetchTokenBal}>{isFetchingBal === true ?  <BeatLoader color="#FFFFFF" /> :"GetBalanceOf"}</button>
                 {balOf ? balOf:null}
             </div>
             
